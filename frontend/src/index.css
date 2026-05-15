@@ -1,0 +1,118 @@
+:root {
+  --color-primary: #5B5FEF;
+  --color-primary-hover: #484DDB;
+  --color-bg: #F7FAFF;
+  --color-surface: rgba(255, 255, 255, 0.66);
+  --color-surface-strong: rgba(255, 255, 255, 0.82);
+  --color-border: rgba(255, 255, 255, 0.55);
+  --color-text: #101827;
+  --color-text-muted: #627087;
+  --color-danger: #EF4444;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --radius: 14px;
+  --shadow: 0 18px 48px rgba(43, 54, 90, 0.14);
+  --glass-blur: blur(20px) saturate(145%);
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(91, 95, 239, 0.18), transparent 34%),
+    radial-gradient(circle at 82% 8%, rgba(16, 185, 129, 0.13), transparent 30%),
+    linear-gradient(135deg, #f8fbff 0%, #edf4ff 42%, #f8fbff 100%);
+  background-attachment: fixed;
+  color: var(--color-text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.page {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 48px;
+}
+
+.button {
+  border: 0;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--color-primary), #7478ff);
+  color: #fff;
+  padding: 10px 14px;
+  font-weight: 700;
+  box-shadow: 0 14px 28px rgba(91, 95, 239, 0.24);
+}
+
+.button:hover {
+  background: var(--color-primary-hover);
+}
+
+.button.secondary {
+  background: rgba(255, 255, 255, 0.56);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-inset);
+}
+
+.button.danger {
+  background: var(--color-danger);
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  border: 1px solid rgba(124, 138, 166, 0.28);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--color-text);
+  box-shadow: var(--glass-inset);
+  backdrop-filter: var(--glass-blur);
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.9rem;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}

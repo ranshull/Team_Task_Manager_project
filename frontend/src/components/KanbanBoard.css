@@ -1,0 +1,56 @@
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.kanban__column {
+  min-height: 520px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.36);
+  padding: 12px;
+  box-shadow: var(--glass-inset);
+  backdrop-filter: var(--glass-blur);
+}
+
+.kanban__column.is-over {
+  outline: 2px solid var(--color-primary);
+}
+
+.kanban__column header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.kanban__column h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.kanban__column header span {
+  color: var(--color-text-muted);
+  font-weight: 800;
+}
+
+.kanban__tasks {
+  display: grid;
+  gap: 10px;
+}
+
+.kanban__dragging {
+  opacity: 0.75;
+}
+
+@media (max-width: 880px) {
+  .kanban {
+    grid-template-columns: 1fr;
+  }
+
+  .kanban__column {
+    min-height: 240px;
+  }
+}

@@ -1,0 +1,81 @@
+.comments {
+  display: grid;
+  gap: 16px;
+}
+
+.comments h2 {
+  margin: 0;
+}
+
+.comments__list {
+  display: grid;
+  gap: 12px;
+}
+
+.comment {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  padding: 14px;
+  box-shadow: var(--glass-inset);
+  backdrop-filter: var(--glass-blur);
+}
+
+.comment__avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(224, 231, 255, 0.78);
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
+.comment__body header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment__body header span {
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+}
+
+.comment__body p {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+.comment__trash {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--color-danger);
+  font-size: 1.2rem;
+}
+
+.comments__form {
+  display: grid;
+  gap: 10px;
+}
+
+.comments__form textarea {
+  width: 100%;
+  border: 1px solid rgba(124, 138, 166, 0.28);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  resize: vertical;
+}
+
+.comments__form button {
+  justify-self: end;
+}
