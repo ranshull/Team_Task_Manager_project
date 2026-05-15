@@ -1,3 +1,8 @@
+.project-detail {
+  display: grid;
+  gap: 18px;
+}
+
 .project-detail__header h1,
 .project-detail__header p,
 .member-panel h2,
@@ -10,11 +15,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: var(--color-surface);
-  padding: 16px;
+  padding: 18px;
   box-shadow: var(--shadow), var(--glass-inset);
   backdrop-filter: var(--glass-blur);
 }
@@ -22,7 +26,6 @@
 .member-list {
   display: grid;
   gap: 12px;
-  margin-bottom: 18px;
 }
 
 .member-list h2 {
@@ -39,9 +42,9 @@
   display: grid;
   gap: 4px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: var(--color-surface);
-  padding: 12px;
+  padding: 14px;
   box-shadow: var(--shadow), var(--glass-inset);
   backdrop-filter: var(--glass-blur);
 }
@@ -65,7 +68,7 @@
 
 .member-panel input {
   border: 1px solid rgba(124, 138, 166, 0.28);
-  border-radius: var(--radius);
+  border-radius: 8px;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.72);
 }

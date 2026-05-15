@@ -1,68 +1,107 @@
 .navbar {
-  background: rgba(255, 255, 255, 0.62);
-  border-bottom: 1px solid var(--color-border);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: 0 10px 36px rgba(43, 54, 90, 0.08);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 36px rgba(43, 54, 90, 0.08);
+  backdrop-filter: var(--glass-blur);
 }
 
 .navbar__inner {
   width: min(1180px, calc(100% - 32px));
+  min-height: 74px;
   margin: 0 auto;
-  min-height: 64px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
 }
 
 .navbar__brand {
-  font-weight: 900;
-  color: var(--color-primary);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
-.navbar__links {
   display: flex;
+  align-items: center;
   gap: 12px;
-  flex: 1;
-}
-
-.navbar__links a {
-  color: var(--color-text-muted);
-  font-weight: 700;
-}
-
-.navbar__links a.active {
   color: var(--color-text);
+  font-weight: 900;
+}
+
+.navbar__mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(91, 95, 239, 0.24);
+}
+
+.navbar__toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  border: 1px solid rgba(124, 138, 166, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  padding: 4px;
+}
+
+.navbar__toggle a {
+  min-width: 112px;
+  border-radius: 7px;
+  color: var(--color-text-muted);
+  padding: 10px 14px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.navbar__toggle a.active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(91, 95, 239, 0.22);
 }
 
 .navbar__user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.navbar__user > div {
+  display: grid;
+  gap: 2px;
+  text-align: right;
 }
 
 .navbar__badge {
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.58);
-  padding: 4px 8px;
   color: var(--color-text-muted);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   text-transform: uppercase;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 820px) {
   .navbar__inner {
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
     padding: 14px 0;
   }
 
+  .navbar__toggle,
   .navbar__user {
     width: 100%;
+    margin-left: 0;
+  }
+
+  .navbar__toggle a {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .navbar__user {
     justify-content: space-between;
+  }
+
+  .navbar__user > div {
+    text-align: left;
   }
 }

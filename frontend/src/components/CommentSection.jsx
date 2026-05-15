@@ -6,6 +6,7 @@ import "./CommentSection.css";
 
 export default function CommentSection({ taskId }) {
   const [body, setBody] = useState("");
+  const [notice, setNotice] = useState("");
   const { user } = useAuth();
   const { data: comments = [], isLoading } = useComments(taskId);
   const postComment = usePostComment(taskId);
@@ -14,8 +15,10 @@ export default function CommentSection({ taskId }) {
   const submit = async (event) => {
     event.preventDefault();
     if (!body.trim()) return;
+    setNotice("");
     await postComment.mutateAsync(body);
     setBody("");
+    setNotice("Comment posted successfully.");
   };
 
   return (
@@ -49,7 +52,10 @@ export default function CommentSection({ taskId }) {
       )}
       <form className="comments__form" onSubmit={submit}>
         <textarea value={body} onChange={(event) => setBody(event.target.value)} rows="4" placeholder="Write a comment..." />
-        <button className="button" disabled={postComment.isPending}>Post</button>
+        {notice && <p className="notice success">{notice}</p>}
+        <button className="button" disabled={postComment.isPending}>
+          {postComment.isPending ? "Posting..." : "Post"}
+        </button>
       </form>
     </section>
   );

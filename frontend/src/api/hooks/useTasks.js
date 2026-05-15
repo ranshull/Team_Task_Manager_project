@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../axios.js";
 
 export function useProjectTasks(projectId) {
@@ -6,6 +6,16 @@ export function useProjectTasks(projectId) {
     queryKey: ["tasks", projectId],
     queryFn: async () => (await api.get(`/api/projects/${projectId}/tasks`)).data,
     enabled: Boolean(projectId)
+  });
+}
+
+export function useProjectTaskQueries(projects) {
+  return useQueries({
+    queries: projects.map((project) => ({
+      queryKey: ["tasks", project.id],
+      queryFn: async () => (await api.get(`/api/projects/${project.id}/tasks`)).data,
+      enabled: Boolean(project.id)
+    }))
   });
 }
 

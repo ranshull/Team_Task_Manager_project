@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../api/hooks/useAuth.js";
 import { useAddMember, useProject } from "../api/hooks/useProjects.js";
 import { useCreateTask, useProjectTasks, useUpdateTask } from "../api/hooks/useTasks.js";
@@ -9,6 +9,7 @@ import "./ProjectDetail.css";
 
 export default function ProjectDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { data: project, isLoading: projectLoading } = useProject(id);
   const { data: tasks = [], isLoading: tasksLoading } = useProjectTasks(id);
@@ -17,6 +18,7 @@ export default function ProjectDetail() {
   const addMember = useAddMember(id);
   const [taskOpen, setTaskOpen] = useState(false);
   const [memberEmail, setMemberEmail] = useState("");
+  const [notice, setNotice] = useState("");
   const [taskForm, setTaskForm] = useState({
     title: "",
     description: "",
@@ -35,15 +37,25 @@ export default function ProjectDetail() {
       assigned_to: taskForm.assigned_to || null,
       due_date: taskForm.due_date || null
     };
-    await createTask.mutateAsync(payload);
+    const task = await createTask.mutateAsync(payload);
+    setNotice("Task created. Opening task details...");
     setTaskOpen(false);
     setTaskForm({ title: "", description: "", assigned_to: "", priority: "medium", status: "todo", due_date: "" });
+    setTimeout(() => navigate(`/tasks/${task.id}`), 700);
   };
 
   const add = async (event) => {
     event.preventDefault();
     await addMember.mutateAsync(memberEmail);
+    setNotice("Member added successfully.");
     setMemberEmail("");
+  };
+
+  const updateStatus = (taskId, status) => {
+    updateTask.mutate(
+      { id: taskId, payload: { status } },
+      { onSuccess: () => setNotice("Task status saved.") }
+    );
   };
 
   return (
@@ -55,6 +67,7 @@ export default function ProjectDetail() {
         </div>
         {isAdmin && <button className="button" onClick={() => setTaskOpen(true)}>Add Task</button>}
       </div>
+      {notice && <p className="notice success">{notice}</p>}
       {isAdmin && (
         <section className="member-panel">
           <div>
@@ -63,7 +76,9 @@ export default function ProjectDetail() {
           </div>
           <form onSubmit={add}>
             <input type="email" placeholder="Member email" value={memberEmail} onChange={(event) => setMemberEmail(event.target.value)} required />
-            <button className="button secondary">Add</button>
+            <button className="button secondary" disabled={addMember.isPending}>
+              {addMember.isPending ? "Adding..." : "Add"}
+            </button>
           </form>
         </section>
       )}
@@ -83,7 +98,7 @@ export default function ProjectDetail() {
         <KanbanBoard
           tasks={tasks}
           members={project.members || []}
-          onStatusChange={(taskId, status) => updateTask.mutate({ id: taskId, payload: { status } })}
+          onStatusChange={updateStatus}
         />
       )}
       <Modal title="Add task" open={taskOpen} onClose={() => setTaskOpen(false)}>
@@ -104,7 +119,9 @@ export default function ProjectDetail() {
             <label className="field"><span>Priority</span><select value={taskForm.priority} onChange={(event) => setTaskForm({ ...taskForm, priority: event.target.value })}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
           </div>
           <label className="field"><span>Due date</span><input type="date" value={taskForm.due_date} onChange={(event) => setTaskForm({ ...taskForm, due_date: event.target.value })} /></label>
-          <button className="button">Create task</button>
+          <button className="button" disabled={createTask.isPending}>
+            {createTask.isPending ? "Creating..." : "Create task"}
+          </button>
         </form>
       </Modal>
     </main>

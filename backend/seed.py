@@ -13,7 +13,12 @@ async def main() -> None:
     password = os.getenv("SEED_ADMIN_PASSWORD", "AdminPass123!")
     existing = await User.find_one(User.email == email)
     if existing:
-        print(f"Admin already exists: {email}")
+        if existing.role != "admin":
+            existing.role = "admin"
+            await existing.save()
+            print(f"Updated existing user to admin: {email}")
+        else:
+            print(f"Admin already exists: {email}")
     else:
         user = User(email=email, username=username, hashed_password=hash_password(password), role="admin")
         await user.insert()

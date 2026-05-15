@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../api/hooks/useAuth.js";
 import { useCreateProject, useProjects } from "../api/hooks/useProjects.js";
 import Modal from "../components/Modal.jsx";
@@ -7,16 +8,20 @@ import "./Projects.css";
 
 export default function Projects() {
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const { data: projects = [], isLoading } = useProjects();
   const createProject = useCreateProject();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", description: "" });
+  const [notice, setNotice] = useState("");
 
   const submit = async (event) => {
     event.preventDefault();
-    await createProject.mutateAsync(form);
+    const project = await createProject.mutateAsync(form);
+    setNotice("Project created. Opening the workspace...");
     setForm({ name: "", description: "" });
     setOpen(false);
+    setTimeout(() => navigate(`/projects/${project.id}`), 700);
   };
 
   return (
@@ -28,6 +33,7 @@ export default function Projects() {
         </div>
         {isAdmin && <button className="button" onClick={() => setOpen(true)}>New Project</button>}
       </div>
+      {notice && <p className="notice success">{notice}</p>}
       {isLoading ? <p>Loading projects...</p> : (
         <section className="projects-grid">
           {projects.map((project) => <ProjectCard key={project.id} project={project} />)}
@@ -37,7 +43,9 @@ export default function Projects() {
         <form className="stack-form" onSubmit={submit}>
           <label className="field"><span>Name</span><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
           <label className="field"><span>Description</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows="4" /></label>
-          <button className="button">Create</button>
+          <button className="button" disabled={createProject.isPending}>
+            {createProject.isPending ? "Creating..." : "Create"}
+          </button>
         </form>
       </Modal>
     </main>

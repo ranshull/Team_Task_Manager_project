@@ -12,9 +12,9 @@
 .modal {
   width: min(560px, 100%);
   background: var(--color-surface);
-  border-radius: var(--radius);
+  border-radius: 8px;
   border: 1px solid var(--color-border);
-  padding: 20px;
+  padding: 22px;
   box-shadow: 0 24px 80px rgba(20, 28, 48, 0.22), var(--glass-inset);
   backdrop-filter: var(--glass-blur);
 }

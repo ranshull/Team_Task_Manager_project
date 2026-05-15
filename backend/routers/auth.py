@@ -18,11 +18,12 @@ async def signup(payload: UserCreate) -> User:
     existing = await User.find_one(Or(User.email == payload.email, User.username == payload.username))
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email or username already exists")
+    has_users = await User.find_all().limit(1).to_list()
     user = User(
         email=payload.email,
         username=payload.username,
         hashed_password=hash_password(payload.password),
-        role="member",
+        role="admin" if not has_users else "member",
     )
     await user.insert()
     return user

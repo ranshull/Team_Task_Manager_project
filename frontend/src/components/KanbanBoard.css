@@ -8,9 +8,9 @@
 .kanban__column {
   min-height: 520px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.36);
-  padding: 12px;
+  padding: 14px;
   box-shadow: var(--glass-inset);
   backdrop-filter: var(--glass-blur);
 }

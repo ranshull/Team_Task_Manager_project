@@ -5,11 +5,11 @@
 
 .task-editor {
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: 8px;
   background: var(--color-surface);
   box-shadow: var(--shadow), var(--glass-inset);
   backdrop-filter: var(--glass-blur);
-  padding: 18px;
+  padding: 22px;
 }
 
 .task-editor__header {

@@ -16,6 +16,7 @@ export default function TaskDetail() {
   const deleteTask = useDeleteTask(task?.project_id);
   const [form, setForm] = useState(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     if (task) {
@@ -36,17 +37,21 @@ export default function TaskDetail() {
   const submit = async (event) => {
     event.preventDefault();
     setError("");
+    setNotice("");
     const payload = isAdmin
       ? { ...form, assigned_to: form.assigned_to || null, due_date: form.due_date || null }
       : { status: form.status };
     try {
       await updateTask.mutateAsync({ id, payload });
+      setNotice("Changes saved. Returning to the project board...");
+      setTimeout(() => navigate(`/projects/${task.project_id}`), 800);
     } catch (err) {
       setError(err.response?.data?.detail || "Unable to update task");
     }
   };
 
   const remove = async () => {
+    if (!window.confirm("Delete this task and its comments?")) return;
     await deleteTask.mutateAsync(id);
     navigate(`/projects/${task.project_id}`);
   };
@@ -82,7 +87,10 @@ export default function TaskDetail() {
           )}
           {isAdmin && <label className="field"><span>Due date</span><input type="date" value={form.due_date} onChange={update("due_date")} /></label>}
           {error && <p className="error">{error}</p>}
-          <button className="button">Save changes</button>
+          {notice && <p className="notice success">{notice}</p>}
+          <button className="button" disabled={updateTask.isPending}>
+            {updateTask.isPending ? "Saving..." : "Save changes"}
+          </button>
         </form>
       </section>
       <CommentSection taskId={id} />

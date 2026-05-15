@@ -44,3 +44,7 @@ class TokenData(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class UserRoleUpdate(BaseModel):
+    role: Literal["admin", "member"]

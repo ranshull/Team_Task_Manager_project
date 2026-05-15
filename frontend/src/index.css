@@ -72,6 +72,11 @@ button {
   background: var(--color-primary-hover);
 }
 
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
 .button.secondary {
   background: rgba(255, 255, 255, 0.56);
   color: var(--color-text);
@@ -111,6 +116,17 @@ button {
 .error {
   color: var(--color-danger);
   font-size: 0.9rem;
+}
+
+.notice {
+  margin: 0;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 8px;
+  background: rgba(236, 253, 245, 0.82);
+  color: #047857;
+  padding: 11px 13px;
+  font-size: 0.92rem;
+  font-weight: 800;
 }
 
 .muted {
