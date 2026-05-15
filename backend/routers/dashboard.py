@@ -14,12 +14,9 @@ async def dashboard(
     project_id: str | None = Query(default=None),
     current_user: User = Depends(get_current_user),
 ) -> DashboardOut:
-    if current_user.role == "admin":
-        projects = await Project.find_all().to_list()
-    else:
-        projects = await Project.find(
-            {"$or": [{"owner_id": current_user.id}, {"member_ids": current_user.id}]}
-        ).to_list()
+    projects = await Project.find(
+        {"$or": [{"owner_id": current_user.id}, {"member_ids": current_user.id}]}
+    ).to_list()
 
     project_lookup = {str(project.id): project for project in projects}
     if project_id:

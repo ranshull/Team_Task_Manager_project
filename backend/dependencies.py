@@ -39,7 +39,7 @@ async def require_admin(current_user: User = Depends(get_current_user)) -> User:
 
 def is_project_member(project: Project, user: User) -> bool:
     user_id = user.id
-    return user.role == "admin" or project.owner_id == user_id or user_id in project.member_ids
+    return project.owner_id == user_id or user_id in project.member_ids
 
 
 async def get_project_or_404(project_id: str) -> Project:
@@ -62,5 +62,5 @@ async def require_project_member(project: Project, user: User) -> None:
 
 
 async def require_owner_or_admin(project: Project, user: User) -> None:
-    if user.role != "admin" and project.owner_id != user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Owner or admin access required")
+    if project.owner_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Project owner access required")

@@ -24,12 +24,9 @@ async def project_out(project: Project) -> ProjectOut:
 
 @router.get("", response_model=list[ProjectOut])
 async def list_projects(current_user: User = Depends(get_current_user)) -> list[ProjectOut]:
-    if current_user.role == "admin":
-        projects = await Project.find_all().sort("-created_at").to_list()
-    else:
-        projects = await Project.find(
+    projects = await Project.find(
         {"$or": [{"owner_id": current_user.id}, {"member_ids": current_user.id}]}
-        ).sort("-created_at").to_list()
+    ).sort("-created_at").to_list()
     return [await project_out(project) for project in projects]
 
 
@@ -83,9 +80,10 @@ async def delete_project(project_id: str, current_user: User = Depends(get_curre
 async def add_member(
     project_id: str,
     payload: AddMemberRequest,
-    _: User = Depends(require_admin),
+    current_user: User = Depends(require_admin),
 ) -> ProjectOut:
     project = await get_project_or_404(project_id)
+    await require_project_member(project, current_user)
     user = await User.find_one(User.email == payload.email)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
