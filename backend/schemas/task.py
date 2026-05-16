@@ -9,6 +9,7 @@ class TaskCreate(BaseModel):
     title: str = Field(min_length=1, max_length=160)
     description: str = ""
     assigned_to: PydanticObjectId | None = None
+    assigned_to_ids: list[PydanticObjectId] | None = None
     status: Literal["todo", "in_progress", "done"] = "todo"
     priority: Literal["low", "medium", "high"] = "medium"
     due_date: date | None = None

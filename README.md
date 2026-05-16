@@ -159,9 +159,10 @@ Regular users only see projects where they are the project leader or have been a
 
 1. A project leader or global admin creates a task.
 2. If the task is assigned to one member, only that member can see it and update its progress.
-3. If the task is assigned to all members, the system creates one copy of the task for each project member.
-4. Each member updates only their own copy of the task.
-5. The project leader and global admin can see every member's copy, so they can track who is `todo`, `in_progress`, or `done`.
+3. If specific members are selected, the system creates one copy of the task for each selected member.
+4. If the task is assigned to all members, the system creates one copy for each project member, excluding the project leader.
+5. Each member updates only their own copy of the task.
+6. The project leader and global admin can see every member's copy, so they can track who is `todo`, `in_progress`, or `done`.
 
 ## Admin and Teams Flow
 

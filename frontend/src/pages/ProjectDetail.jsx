@@ -25,13 +25,15 @@ export default function ProjectDetail() {
   const [memberEmail, setMemberEmail] = useState("");
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [taskAssigneeQuery, setTaskAssigneeQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [projectForm, setProjectForm] = useState({ name: "", description: "" });
   const [taskForm, setTaskForm] = useState({
     title: "",
     description: "",
-    assigned_to: "",
+    assignmentMode: "all",
+    assigned_to_ids: [],
     priority: "medium",
     status: "todo",
     due_date: ""
@@ -43,6 +45,13 @@ export default function ProjectDetail() {
 
   const memberIds = new Set((project.member_ids || []).map(String));
   const memberSuggestions = (memberSearch.data || []).filter((member) => !memberIds.has(String(member.id)));
+  const assignableMembers = (project.members || []).filter((member) => member.id !== project.owner_id);
+  const selectedAssignees = assignableMembers.filter((member) => taskForm.assigned_to_ids.includes(member.id));
+  const filteredAssignableMembers = assignableMembers.filter((member) => {
+    const query = taskAssigneeQuery.trim().toLowerCase();
+    if (!query) return true;
+    return member.username.toLowerCase().includes(query) || member.email.toLowerCase().includes(query);
+  });
 
   const openProjectEditor = () => {
     setProjectForm({ name: project.name, description: project.description || "" });
@@ -76,23 +85,56 @@ export default function ProjectDetail() {
 
   const create = async (event) => {
     event.preventDefault();
-    const isForAllMembers = !taskForm.assigned_to;
+    const isForAllMembers = taskForm.assignmentMode === "all";
+    const selectedIds = taskForm.assignmentMode === "selected" ? taskForm.assigned_to_ids : [];
+    if (taskForm.assignmentMode === "selected" && selectedIds.length === 0) {
+      setError("Select at least one member for this task.");
+      return;
+    }
     const payload = {
-      ...taskForm,
-      assigned_to: taskForm.assigned_to || null,
+      title: taskForm.title,
+      description: taskForm.description,
+      assigned_to: selectedIds.length === 1 ? selectedIds[0] : null,
+      assigned_to_ids: selectedIds.length > 1 ? selectedIds : null,
+      status: taskForm.status,
+      priority: taskForm.priority,
       due_date: taskForm.due_date || null
     };
-    const task = await createTask.mutateAsync(payload);
-    setNotice(
-      isForAllMembers
-        ? `Task created for ${project.members?.length || 0} members. Each member now has their own progress.`
-        : "Task created. Opening task details..."
-    );
-    setTaskOpen(false);
-    setTaskForm({ title: "", description: "", assigned_to: "", priority: "medium", status: "todo", due_date: "" });
-    if (!isForAllMembers) {
-      setTimeout(() => navigate(`/tasks/${task.id}`), 700);
+    setNotice("");
+    setError("");
+    try {
+      const task = await createTask.mutateAsync(payload);
+      const assignedCount = isForAllMembers ? assignableMembers.length : selectedIds.length;
+      setNotice(
+        assignedCount > 1
+          ? `Task created for ${assignedCount} members. Each member now has their own progress.`
+          : "Task created. Opening task details..."
+      );
+      setTaskOpen(false);
+      setTaskAssigneeQuery("");
+      setTaskForm({ title: "", description: "", assignmentMode: "all", assigned_to_ids: [], priority: "medium", status: "todo", due_date: "" });
+      if (assignedCount === 1) {
+        setTimeout(() => navigate(`/tasks/${task.id}`), 700);
+      }
+    } catch (err) {
+      setError(err.response?.data?.detail || "Unable to create task");
     }
+  };
+
+  const toggleTaskAssignee = (memberId) => {
+    setTaskForm((current) => {
+      const selected = current.assigned_to_ids.includes(memberId)
+        ? current.assigned_to_ids.filter((id) => id !== memberId)
+        : [...current.assigned_to_ids, memberId];
+      return { ...current, assignmentMode: "selected", assigned_to_ids: selected };
+    });
+  };
+
+  const clearTaskAssignee = (memberId) => {
+    setTaskForm((current) => ({
+      ...current,
+      assigned_to_ids: current.assigned_to_ids.filter((id) => id !== memberId)
+    }));
   };
 
   const add = async (event) => {
@@ -224,12 +266,57 @@ export default function ProjectDetail() {
           <label className="field"><span>Description</span><textarea rows="4" value={taskForm.description} onChange={(event) => setTaskForm({ ...taskForm, description: event.target.value })} /></label>
           <label className="field">
             <span>Assign to</span>
-            <select value={taskForm.assigned_to} onChange={(event) => setTaskForm({ ...taskForm, assigned_to: event.target.value })}>
-              <option value="">All members - create one task per member</option>
-              {project.members?.map((member) => (
-                <option key={member.id} value={member.id}>{member.username} ({member.email})</option>
-              ))}
-            </select>
+            <div className="task-assignee">
+              <label className="task-assignee__mode">
+                <input
+                  type="radio"
+                  checked={taskForm.assignmentMode === "all"}
+                  onChange={() => setTaskForm((current) => ({ ...current, assignmentMode: "all", assigned_to_ids: [] }))}
+                />
+                <span>All members, excluding project leader</span>
+              </label>
+              <label className="task-assignee__mode">
+                <input
+                  type="radio"
+                  checked={taskForm.assignmentMode === "selected"}
+                  onChange={() => setTaskForm((current) => ({ ...current, assignmentMode: "selected" }))}
+                />
+                <span>Choose specific members</span>
+              </label>
+              {taskForm.assignmentMode === "selected" && (
+                <div className="task-assignee__picker">
+                  <input
+                    value={taskAssigneeQuery}
+                    onChange={(event) => setTaskAssigneeQuery(event.target.value)}
+                    placeholder="Search project members"
+                  />
+                  {selectedAssignees.length > 0 && (
+                    <div className="task-assignee__chips">
+                      {selectedAssignees.map((member) => (
+                        <button key={member.id} type="button" onClick={() => clearTaskAssignee(member.id)}>
+                          {member.username}
+                          <span>Remove</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="task-assignee__options">
+                    {filteredAssignableMembers.map((member) => (
+                      <button
+                        key={member.id}
+                        type="button"
+                        className={taskForm.assigned_to_ids.includes(member.id) ? "is-selected" : ""}
+                        onClick={() => toggleTaskAssignee(member.id)}
+                      >
+                        <strong>{member.username}</strong>
+                        <span>{member.email}</span>
+                      </button>
+                    ))}
+                    {filteredAssignableMembers.length === 0 && <p className="muted">No project members match this search.</p>}
+                  </div>
+                </div>
+              )}
+            </div>
           </label>
           <div className="form-grid">
             <label className="field"><span>Status</span><select value={taskForm.status} onChange={(event) => setTaskForm({ ...taskForm, status: event.target.value })}><option value="todo">To do</option><option value="in_progress">In progress</option><option value="done">Done</option></select></label>
