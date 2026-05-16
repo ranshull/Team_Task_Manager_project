@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
-    window.location.assign("/login");
+    window.location.assign("/");
   }, []);
 
   const applySession = useCallback((tokens, nextUser = user) => {
