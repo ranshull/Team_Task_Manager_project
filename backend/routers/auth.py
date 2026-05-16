@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from config import get_settings
 from dependencies import get_current_user
 from models import User
+from routers.settings import get_signup_setting
 from schemas.user import RefreshRequest, Token, UserCreate, UserOut, UserProfileUpdate
 from security import create_access_token, create_refresh_token, hash_password, verify_password
 
@@ -19,12 +20,13 @@ async def signup(payload: UserCreate) -> User:
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email or username already exists")
     has_users = await User.find_all().limit(1).to_list()
+    signup_setting = await get_signup_setting()
     user = User(
         email=payload.email,
         username=payload.username,
         hashed_password=hash_password(payload.password),
         phone=payload.phone,
-        role="admin" if not has_users else "member",
+        role="admin" if not has_users else payload.role if signup_setting.allow_signup_role_selection else "member",
     )
     await user.insert()
     return user

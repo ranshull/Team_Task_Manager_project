@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../api/hooks/useAuth.js";
+import { useSignupSettings, useUpdateSignupSettings } from "../api/hooks/useSettings.js";
 import { useUpdateUserRole, useUsers } from "../api/hooks/useUsers.js";
 import "./Teams.css";
 
 export default function Teams() {
   const { user, isAdmin, logout } = useAuth();
   const { data: users = [], isLoading, isError, error: usersError } = useUsers();
+  const { data: signupSettings } = useSignupSettings();
   const updateRole = useUpdateUserRole();
+  const updateSignupSettings = useUpdateSignupSettings();
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -64,6 +67,22 @@ export default function Teams() {
     }
   };
 
+  const changeSignupRoleSelection = async () => {
+    const nextValue = !signupSettings?.allow_signup_role_selection;
+    const message = nextValue
+      ? "Allow new users to choose Admin or Member during signup?"
+      : "Turn off role selection during signup so new users default to Member?";
+    if (!window.confirm(message)) return;
+    setNotice("");
+    setError("");
+    try {
+      await updateSignupSettings.mutateAsync({ allow_signup_role_selection: nextValue });
+      setNotice(nextValue ? "Signup role selection is now enabled." : "Signup role selection is now disabled.");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Unable to update signup setting");
+    }
+  };
+
   return (
     <main className="page teams-page">
       <div className="teams-page__header">
@@ -89,6 +108,24 @@ export default function Teams() {
         <TeamStat label="Total users" value={users.length} />
         <TeamStat label="Admins" value={users.filter((member) => member.role === "admin").length} />
         <TeamStat label="Members" value={users.filter((member) => member.role === "member").length} />
+      </section>
+
+      <section className="signup-setting">
+        <div>
+          <h2>Signup role selection</h2>
+          <p className="muted">Control whether new users can choose Admin or Member while creating an account.</p>
+        </div>
+        <button
+          type="button"
+          className={`toggle-switch ${signupSettings?.allow_signup_role_selection ? "is-on" : ""}`}
+          title="When enabled, the signup form shows a role dropdown so users can choose Admin or Member. When disabled, new signups become Members by default."
+          aria-pressed={Boolean(signupSettings?.allow_signup_role_selection)}
+          disabled={updateSignupSettings.isPending}
+          onClick={changeSignupRoleSelection}
+        >
+          <span />
+          {signupSettings?.allow_signup_role_selection ? "On" : "Off"}
+        </button>
       </section>
 
       <section className="team-table" aria-label="Team members">
