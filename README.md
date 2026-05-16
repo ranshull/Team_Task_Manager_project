@@ -5,37 +5,44 @@ Team Task Manager is a full-stack project management application for small teams
 ## Screenshots
 
 ### Landing Page
-![Landing Page](Project_Pics/Screenshot%202026-05-15%20at%206.00.24%E2%80%AFPM.png)
+![Landing Page](Project_Pics/landing_page.png)
 
 ### Dashboard
-![Dashboard](Project_Pics/Screenshot%202026-05-15%20at%206.02.00%E2%80%AFPM.png)
+![Dashboard](Project_Pics/DashBoard.png)
+
+### Profile Page
+![Profile Page](Project_Pics/profile.png)
 
 ### Projects
-![Projects Page](Project_Pics/Screenshot%202026-05-15%20at%206.02.17%E2%80%AFPM.png)
+![Projects Page](Project_Pics/project_list.png)
 
 ### Project Board
-![Project Board](Project_Pics/Screenshot%202026-05-15%20at%206.02.57%E2%80%AFPM.png)
+![Project Board](Project_Pics/project_detail.png)
 
 ### Task Detail and Comments
-![Task Details and Comments](Project_Pics/Screenshot%202026-05-15%20at%206.03.56%E2%80%AFPM.png)
+![Task Details and Comments](Project_Pics/Task.png)
 
 ### Teams Admin Page
-![Teams Admin Page](Project_Pics/Screenshot%202026-05-15%20at%206.04.15%E2%80%AFPM.png)
+![Teams Admin Page](Project_Pics/Admin.png)
+
+
 
 ## Main Features
 
 - User signup and login with JWT authentication.
 - Admin and member roles.
-- Admins can create projects.
-- Project creators are automatically added as project members.
-- Users only see projects where they are the owner or have been added as a member.
-- Admins can add members to projects they belong to.
+- Every new user starts as a member, except the first signup which bootstraps the first admin.
+- Any signed-in user can create a project.
+- Project creators become the project leader and are automatically added as project members.
+- Users only see projects where they are the leader or have been added as a member.
+- Project leaders can add members to their projects.
+- Project leaders can edit project details or delete their own projects.
 - Project members can view project boards and tasks.
-- Admins can create, update, and delete tasks.
+- Project leaders and the global admin can create, update, and delete tasks.
 - Members can update task status.
 - Users can post comments on tasks.
 - Dashboard charts show project/task analytics from the user's accessible projects.
-- Teams page lets admins view users and change a user role from member to admin.
+- Teams page lets the global admin view users and transfer the single admin role.
 
 ## Tech Stack
 
@@ -90,55 +97,87 @@ frontend/
 A member can:
 
 - sign in and view their accessible projects
+- create new projects
+- become the leader of projects they create
 - view tasks in projects where they are a member
 - update task status
 - post comments on tasks
 
 A member cannot:
 
-- create projects
-- add project members
-- create or delete tasks
+- add members to projects they do not lead
+- create, fully edit, or delete tasks in projects they do not lead
 - manage team roles
 - view projects they are not part of
 
-### Admin
+### Project Leader
 
-An admin can:
+A project leader is the user who created a project.
 
-- create projects
-- create tasks inside projects they belong to
-- add members to projects they belong to
-- update and delete tasks
+A project leader can:
+
+- view and manage their project
+- edit the project name and description
+- delete their project
+- add members to their project
+- create tasks in their project
+- fully edit and delete tasks in their project
+
+### Global Admin
+
+There should be only one global admin.
+
+A global admin can:
+
+- view all projects
+- manage all projects
+- edit or delete any project
+- create, update, and delete tasks in any project
 - view the Teams page
-- change another user from member to admin
+- transfer admin access to another user
 
 Important project visibility rule:
 
-Even if a user is an admin, they only see projects where they are the project owner or have been added as a member.
+Regular users only see projects where they are the project leader or have been added as a member. The global admin can see all projects.
 
 ## Project Membership Flow
 
-1. An admin creates a project.
+1. Any signed-in user creates a project.
 2. The project creator is saved as the project owner.
 3. The project creator is also added to the project members list.
-4. The admin can add other users to that project by email.
-5. Added users can now see that project in their Projects page and Dashboard.
-6. Users who are not added to a project cannot see or open it.
+4. The project creator is the project leader.
+5. The project leader can edit the project name and description.
+6. The project leader can delete the project when it is no longer needed.
+7. The project leader can add other users to that project by email.
+8. Added users can now see that project in their Projects page and Dashboard.
+9. Users who are not added to a project cannot see or open it.
 
 ## Admin and Teams Flow
 
-1. Sign in as an admin.
+1. Sign in as the global admin.
 2. Open the `Teams` page from the top navigation.
 3. The page shows all users.
 4. Use the role dropdown to change a user from `member` to `admin`.
-5. After that user logs in again, they can create projects.
+5. Confirm the transfer.
+6. The selected user becomes the only global admin, and the previous admin becomes a member.
 
 If the Teams page does not show users:
 
 - make sure you are logged in as an admin
 - restart the backend if the users route was recently added
-- confirm the account has `role: "admin"` in MongoDB
+- confirm exactly one account has `role: "admin"` in MongoDB
+
+## Admin Login
+
+Use this account to access the admin dashboard and Teams page:
+
+```text
+Email: admin@example.com
+Username: admin
+Password: AdminPass123!
+```
+
+The admin can sign in with either the email address or username.
 
 ## Authentication Flow
 
@@ -235,7 +274,7 @@ SEED_ADMIN_PASSWORD=AdminPass123! \
 python seed.py
 ```
 
-If the user already exists but is a member, the seed script updates that user to admin.
+If the user already exists but is a member, the seed script updates that user to admin. Keep one global admin account active for the intended app flow.
 
 ## Main API Endpoints
 
@@ -357,11 +396,11 @@ VITE_API_URL=https://your-backend-url
 
 ### Admin cannot see a project
 
-Admins only see projects where they are the owner or have been added as a member. Add the admin to the project members list if they need access.
+The global admin can see all projects. Regular users only see projects where they are the leader or have been added as a member.
 
-### Member cannot create a project
+### Member cannot manage a project
 
-Only admins can create projects. Promote the user from the Teams page.
+Members can create their own projects. To manage an existing project, they must be that project's leader or the global admin.
 
 ### Frontend cannot connect to backend
 

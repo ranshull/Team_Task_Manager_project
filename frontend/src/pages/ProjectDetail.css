@@ -10,6 +10,21 @@
   margin: 0;
 }
 
+.project-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.project-detail__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .member-panel {
   display: flex;
   align-items: center;
@@ -85,6 +100,10 @@
   .member-panel form {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .project-detail__actions {
+    justify-content: flex-start;
   }
 
   .form-grid {

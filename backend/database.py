@@ -2,7 +2,7 @@ from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import get_settings
-from models import AppSetting, Comment, Project, Task, User
+from models import Comment, Project, Task, User
 
 client: AsyncIOMotorClient | None = None
 
@@ -13,7 +13,7 @@ async def init_db() -> None:
     client = AsyncIOMotorClient(settings.mongo_uri)
     await init_beanie(
         database=client[settings.database_name],
-        document_models=[User, Project, Task, Comment, AppSetting],
+        document_models=[User, Project, Task, Comment],
     )
 
 

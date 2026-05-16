@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../api/hooks/useAuth.js";
-import { useSignupSettings } from "../api/hooks/useSettings.js";
 import "./Login.css";
 
 export default function Signup() {
-  const [form, setForm] = useState({ email: "", username: "", phone: "", password: "", role: "member" });
+  const [form, setForm] = useState({ email: "", username: "", phone: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const { signup, isAuthenticated } = useAuth();
-  const { data: signupSettings } = useSignupSettings();
   const navigate = useNavigate();
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
@@ -54,15 +52,6 @@ export default function Signup() {
         <label className="field"><span>Email</span><input type="email" value={form.email} onChange={update("email")} required /></label>
         <label className="field"><span>Username</span><input value={form.username} onChange={update("username")} required minLength="3" /></label>
         <label className="field"><span>Phone</span><input value={form.phone} onChange={update("phone")} placeholder="Optional" /></label>
-        {signupSettings?.allow_signup_role_selection && (
-          <label className="field">
-            <span>Account role</span>
-            <select value={form.role} onChange={update("role")}>
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
-          </label>
-        )}
         <label className="field password-field">
           <span>Password</span>
           <div>

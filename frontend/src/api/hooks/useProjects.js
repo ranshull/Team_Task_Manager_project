@@ -24,6 +24,32 @@ export function useCreateProject() {
   });
 }
 
+export function useUpdateProject(id) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload) => (await api.put(`/api/projects/${id}`, payload)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    }
+  });
+}
+
+export function useDeleteProject() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      await api.delete(`/api/projects/${id}`);
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    }
+  });
+}
+
 export function useAddMember(projectId) {
   const queryClient = useQueryClient();
   return useMutation({

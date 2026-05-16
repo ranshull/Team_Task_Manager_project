@@ -1,7 +1,7 @@
 from beanie.odm.fields import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dependencies import get_current_user, get_project_or_404, require_admin, require_owner_or_admin, require_project_member
+from dependencies import get_current_user, get_project_or_404, require_owner_or_admin, require_project_member
 from models import Comment, Project, Task, User
 from schemas.project import AddMemberRequest, ProjectCreate, ProjectOut, ProjectUpdate
 
@@ -24,14 +24,17 @@ async def project_out(project: Project) -> ProjectOut:
 
 @router.get("", response_model=list[ProjectOut])
 async def list_projects(current_user: User = Depends(get_current_user)) -> list[ProjectOut]:
-    projects = await Project.find(
-        {"$or": [{"owner_id": current_user.id}, {"member_ids": current_user.id}]}
-    ).sort("-created_at").to_list()
+    if current_user.role == "admin":
+        projects = await Project.find_all().sort("-created_at").to_list()
+    else:
+        projects = await Project.find(
+            {"$or": [{"owner_id": current_user.id}, {"member_ids": current_user.id}]}
+        ).sort("-created_at").to_list()
     return [await project_out(project) for project in projects]
 
 
 @router.post("", response_model=ProjectOut, status_code=status.HTTP_201_CREATED)
-async def create_project(payload: ProjectCreate, current_user: User = Depends(require_admin)) -> Project:
+async def create_project(payload: ProjectCreate, current_user: User = Depends(get_current_user)) -> ProjectOut:
     project = Project(
         name=payload.name,
         description=payload.description,
@@ -39,7 +42,7 @@ async def create_project(payload: ProjectCreate, current_user: User = Depends(re
         member_ids=[current_user.id],
     )
     await project.insert()
-    return project
+    return await project_out(project)
 
 
 @router.get("/{project_id}", response_model=ProjectOut)
@@ -80,10 +83,10 @@ async def delete_project(project_id: str, current_user: User = Depends(get_curre
 async def add_member(
     project_id: str,
     payload: AddMemberRequest,
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
 ) -> ProjectOut:
     project = await get_project_or_404(project_id)
-    await require_project_member(project, current_user)
+    await require_owner_or_admin(project, current_user)
     user = await User.find_one(User.email == payload.email)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

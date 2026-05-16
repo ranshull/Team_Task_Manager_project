@@ -3,7 +3,7 @@ import { useAuth } from "../api/hooks/useAuth.js";
 import "./Navbar.css";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   return (
     <header className="navbar">
       <div className="navbar__inner">
@@ -14,7 +14,7 @@ export default function Navbar() {
         <nav className="navbar__toggle" aria-label="Primary">
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/projects">Projects</NavLink>
-          <NavLink to="/teams">Teams</NavLink>
+          {isAdmin && <NavLink to="/teams">Teams</NavLink>}
           <NavLink to="/profile">Profile</NavLink>
         </nav>
         <div className="navbar__user">

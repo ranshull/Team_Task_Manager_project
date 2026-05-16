@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
 from database import close_db, init_db
-from routers import auth, comments, dashboard, projects, settings as settings_router, tasks, users
+from routers import auth, comments, dashboard, projects, tasks, users
 
 
 @asynccontextmanager
@@ -32,7 +32,6 @@ app.include_router(tasks.router)
 app.include_router(comments.router)
 app.include_router(dashboard.router)
 app.include_router(users.router)
-app.include_router(settings_router.router)
 
 
 @app.get("/health")

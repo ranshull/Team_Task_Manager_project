@@ -1,15 +1,12 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../api/hooks/useAuth.js";
-import { useSignupSettings, useUpdateSignupSettings } from "../api/hooks/useSettings.js";
 import { useUpdateUserRole, useUsers } from "../api/hooks/useUsers.js";
 import "./Teams.css";
 
 export default function Teams() {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, refreshUser } = useAuth();
   const { data: users = [], isLoading, isError, error: usersError } = useUsers();
-  const { data: signupSettings } = useSignupSettings();
   const updateRole = useUpdateUserRole();
-  const updateSignupSettings = useUpdateSignupSettings();
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -24,7 +21,7 @@ export default function Teams() {
     ));
   }, [query, users]);
 
-  const canManageRoles = !isError && (isAdmin || users.length > 0);
+  const canManageRoles = !isError && isAdmin;
 
   if (isLoading) {
     return <main className="page loading-state"><span className="spinner" />Loading team...</main>;
@@ -34,7 +31,7 @@ export default function Teams() {
     const statusCode = usersError?.response?.status;
     const lockedMessage = statusCode === 404
       ? "The Teams API is not available yet. Restart the backend server so the new users route is loaded."
-      : "Only admins can view all users and manage team roles.";
+      : "Only the global admin can view all users and manage team roles.";
     return (
       <main className="page teams-page">
         <section className="teams-locked">
@@ -53,33 +50,21 @@ export default function Teams() {
 
   const changeRole = async (member, role) => {
     if (member.role === role) return;
+    if (role === "admin" && !window.confirm(`Make ${member.username} the only global admin? Your admin access will move to this user.`)) {
+      return;
+    }
     setNotice("");
     setError("");
     try {
       await updateRole.mutateAsync({ id: member.id, role });
+      await refreshUser();
       setNotice(
         role === "admin"
-          ? `${member.username} is now an admin and can create projects.`
+          ? `${member.username} is now the only global admin.`
           : `${member.username} is now a member.`
       );
     } catch (err) {
       setError(err.response?.data?.detail || "Unable to update role");
-    }
-  };
-
-  const changeSignupRoleSelection = async () => {
-    const nextValue = !signupSettings?.allow_signup_role_selection;
-    const message = nextValue
-      ? "Allow new users to choose Admin or Member during signup?"
-      : "Turn off role selection during signup so new users default to Member?";
-    if (!window.confirm(message)) return;
-    setNotice("");
-    setError("");
-    try {
-      await updateSignupSettings.mutateAsync({ allow_signup_role_selection: nextValue });
-      setNotice(nextValue ? "Signup role selection is now enabled." : "Signup role selection is now disabled.");
-    } catch (err) {
-      setError(err.response?.data?.detail || "Unable to update signup setting");
     }
   };
 
@@ -89,7 +74,7 @@ export default function Teams() {
         <div>
           <p className="teams-page__eyebrow">Admin controls</p>
           <h1>Teams</h1>
-          <p className="muted">View all users and change member roles. Admins can create projects and manage workspaces.</p>
+          <p className="muted">View all users and manage the single global admin role. New signups always start as members.</p>
         </div>
         <label className="field teams-search">
           <span>Search team</span>
@@ -108,24 +93,6 @@ export default function Teams() {
         <TeamStat label="Total users" value={users.length} />
         <TeamStat label="Admins" value={users.filter((member) => member.role === "admin").length} />
         <TeamStat label="Members" value={users.filter((member) => member.role === "member").length} />
-      </section>
-
-      <section className="signup-setting">
-        <div>
-          <h2>Signup role selection</h2>
-          <p className="muted">Control whether new users can choose Admin or Member while creating an account.</p>
-        </div>
-        <button
-          type="button"
-          className={`toggle-switch ${signupSettings?.allow_signup_role_selection ? "is-on" : ""}`}
-          title="When enabled, the signup form shows a role dropdown so users can choose Admin or Member. When disabled, new signups become Members by default."
-          aria-pressed={Boolean(signupSettings?.allow_signup_role_selection)}
-          disabled={updateSignupSettings.isPending}
-          onClick={changeSignupRoleSelection}
-        >
-          <span />
-          {signupSettings?.allow_signup_role_selection ? "On" : "Off"}
-        </button>
       </section>
 
       <section className="team-table" aria-label="Team members">

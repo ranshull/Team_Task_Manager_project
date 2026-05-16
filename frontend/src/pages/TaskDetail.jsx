@@ -9,7 +9,7 @@ import "./TaskDetail.css";
 export default function TaskDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { data: task, isLoading } = useTask(id);
   const { data: project } = useProject(task?.project_id);
   const updateTask = useUpdateTask(task?.project_id);
@@ -44,6 +44,7 @@ export default function TaskDetail() {
   }
 
   const assignee = project?.members?.find((member) => member.id === task.assigned_to);
+  const canManageTask = isAdmin || project?.owner_id === user?.id;
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
 
   const saveStatus = async (nextStatus) => {
@@ -89,8 +90,8 @@ export default function TaskDetail() {
             <p className="muted">{project?.name || "Project"}</p>
           </div>
           <div className="task-summary__actions">
-            {isAdmin && <button className="button secondary" onClick={() => setEditing((current) => !current)}>{editing ? "Close edit" : "Edit task"}</button>}
-            {isAdmin && <button className="button danger" onClick={remove} disabled={deleteTask.isPending}>{deleteTask.isPending ? "Deleting..." : "Delete"}</button>}
+            {canManageTask && <button className="button secondary" onClick={() => setEditing((current) => !current)}>{editing ? "Close edit" : "Edit task"}</button>}
+            {canManageTask && <button className="button danger" onClick={remove} disabled={deleteTask.isPending}>{deleteTask.isPending ? "Deleting..." : "Delete"}</button>}
           </div>
         </div>
 
@@ -116,7 +117,7 @@ export default function TaskDetail() {
         {notice && <p className="notice success">{notice}</p>}
       </section>
 
-      {isAdmin && editing && (
+      {canManageTask && editing && (
         <section className="task-editor">
           <div className="task-editor__header">
             <h2>Edit task</h2>

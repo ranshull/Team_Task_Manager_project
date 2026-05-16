@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dependencies import get_current_user, get_project_or_404, get_task_or_404, require_project_member
+from dependencies import get_current_user, get_project_or_404, get_task_or_404, require_owner_or_admin, require_project_member
 from models import Comment, Project, Task, User
 from schemas.task import TaskCreate, TaskOut, TaskUpdate
 
@@ -27,10 +27,8 @@ async def create_task(
     payload: TaskCreate,
     current_user: User = Depends(get_current_user),
 ) -> Task:
-    if current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     project = await get_project_or_404(project_id)
-    await require_project_member(project, current_user)
+    await require_owner_or_admin(project, current_user)
     ensure_assignee_is_member(project, payload.assigned_to)
     task = Task(project_id=project.id, created_by=current_user.id, **payload.model_dump())
     await task.insert()
@@ -55,10 +53,10 @@ async def update_task(
     project = await get_project_or_404(str(task.project_id))
     await require_project_member(project, current_user)
     data = payload.model_dump(exclude_unset=True)
-    if current_user.role != "admin":
+    if current_user.role != "admin" and project.owner_id != current_user.id:
         disallowed = set(data) - {"status"}
         if disallowed:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Members may only update task status")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Project members may only update task status")
     ensure_assignee_is_member(project, data.get("assigned_to"))
     for key, value in data.items():
         setattr(task, key, value)
@@ -69,10 +67,8 @@ async def update_task(
 
 @router.delete("/api/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(task_id: str, current_user: User = Depends(get_current_user)) -> None:
-    if current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     task = await get_task_or_404(task_id)
     project = await get_project_or_404(str(task.project_id))
-    await require_project_member(project, current_user)
+    await require_owner_or_admin(project, current_user)
     await Comment.find(Comment.task_id == task.id).delete()
     await task.delete()

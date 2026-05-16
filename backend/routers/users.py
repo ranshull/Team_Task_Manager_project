@@ -22,8 +22,14 @@ async def update_user_role(
     user = await User.get(PydanticObjectId(user_id))
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    if user.id == current_user.id and payload.role != "admin":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot remove your own admin role")
+    if payload.role == "admin" and user.role != "admin":
+        existing_admins = await User.find(User.role == "admin").to_list()
+        for admin in existing_admins:
+            if admin.id != user.id:
+                admin.role = "member"
+                await admin.save()
+    elif user.id == current_user.id and payload.role != "admin":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Promote another user to transfer admin access")
     user.role = payload.role
     await user.save()
     return user

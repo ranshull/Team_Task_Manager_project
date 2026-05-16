@@ -86,6 +86,13 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const { data } = await api.get("/api/auth/me");
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
+    return data;
+  }, []);
+
   const value = useMemo(() => ({
     accessToken,
     user,
@@ -95,8 +102,9 @@ export function AuthProvider({ children }) {
     login,
     signup,
     updateProfile,
+    refreshUser,
     logout
-  }), [accessToken, user, ready, logout, updateProfile]);
+  }), [accessToken, user, ready, logout, updateProfile, refreshUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
