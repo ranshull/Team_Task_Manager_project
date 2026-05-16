@@ -9,7 +9,7 @@ export default function TaskCard({ task, assigneeLabel }) {
         <span>{task.priority}</span>
       </div>
       {task.description && <p>{task.description}</p>}
-      <small>Assigned to {assigneeLabel || "all members"}</small>
+      <small>Assigned to {assigneeLabel || "unassigned"}</small>
       {task.due_date && <small>Due {task.due_date}</small>}
     </Link>
   );

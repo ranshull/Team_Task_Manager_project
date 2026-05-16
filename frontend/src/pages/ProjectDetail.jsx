@@ -69,16 +69,23 @@ export default function ProjectDetail() {
 
   const create = async (event) => {
     event.preventDefault();
+    const isForAllMembers = !taskForm.assigned_to;
     const payload = {
       ...taskForm,
       assigned_to: taskForm.assigned_to || null,
       due_date: taskForm.due_date || null
     };
     const task = await createTask.mutateAsync(payload);
-    setNotice("Task created. Opening task details...");
+    setNotice(
+      isForAllMembers
+        ? `Task created for ${project.members?.length || 0} members. Each member now has their own progress.`
+        : "Task created. Opening task details..."
+    );
     setTaskOpen(false);
     setTaskForm({ title: "", description: "", assigned_to: "", priority: "medium", status: "todo", due_date: "" });
-    setTimeout(() => navigate(`/tasks/${task.id}`), 700);
+    if (!isForAllMembers) {
+      setTimeout(() => navigate(`/tasks/${task.id}`), 700);
+    }
   };
 
   const add = async (event) => {
@@ -156,7 +163,7 @@ export default function ProjectDetail() {
           <label className="field">
             <span>Assign to</span>
             <select value={taskForm.assigned_to} onChange={(event) => setTaskForm({ ...taskForm, assigned_to: event.target.value })}>
-              <option value="">All members</option>
+              <option value="">All members - create one task per member</option>
               {project.members?.map((member) => (
                 <option key={member.id} value={member.id}>{member.username} ({member.email})</option>
               ))}

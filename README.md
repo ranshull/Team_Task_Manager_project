@@ -39,7 +39,8 @@ Team Task Manager is a full-stack project management application for small teams
 - Project leaders can edit project details or delete their own projects.
 - Project members can view project boards and tasks.
 - Project leaders and the global admin can create, update, and delete tasks.
-- Members can update task status.
+- Members only see tasks assigned to them and can update their own task status.
+- Assigning a task to all members creates one tracked task per member.
 - Users can post comments on tasks.
 - Dashboard charts show project/task analytics from the user's accessible projects.
 - Teams page lets the global admin view users and transfer the single admin role.
@@ -100,11 +101,12 @@ A member can:
 - create new projects
 - become the leader of projects they create
 - view tasks in projects where they are a member
-- update task status
+- update the status of tasks assigned to them
 - post comments on tasks
 
 A member cannot:
 
+- view tasks assigned to other members
 - add members to projects they do not lead
 - create, fully edit, or delete tasks in projects they do not lead
 - manage team roles
@@ -122,6 +124,7 @@ A project leader can:
 - add members to their project
 - create tasks in their project
 - fully edit and delete tasks in their project
+- see each member's status when a task is assigned to all members
 
 ### Global Admin
 
@@ -151,6 +154,14 @@ Regular users only see projects where they are the project leader or have been a
 7. The project leader can add other users to that project by email.
 8. Added users can now see that project in their Projects page and Dashboard.
 9. Users who are not added to a project cannot see or open it.
+
+## Task Assignment Flow
+
+1. A project leader or global admin creates a task.
+2. If the task is assigned to one member, only that member can see it and update its progress.
+3. If the task is assigned to all members, the system creates one copy of the task for each project member.
+4. Each member updates only their own copy of the task.
+5. The project leader and global admin can see every member's copy, so they can track who is `todo`, `in_progress`, or `done`.
 
 ## Admin and Teams Flow
 

@@ -46,6 +46,10 @@ def is_project_leader(project: Project, user: User) -> bool:
     return user.role == "admin" or project.owner_id == user.id
 
 
+def can_access_task(project: Project, task: Task, user: User) -> bool:
+    return is_project_leader(project, user) or task.assigned_to == user.id
+
+
 async def get_project_or_404(project_id: str) -> Project:
     project = await Project.get(PydanticObjectId(project_id))
     if project is None:
@@ -68,3 +72,8 @@ async def require_project_member(project: Project, user: User) -> None:
 async def require_owner_or_admin(project: Project, user: User) -> None:
     if not is_project_leader(project, user):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Project leader access required")
+
+
+async def require_task_access(project: Project, task: Task, user: User) -> None:
+    if not can_access_task(project, task, user):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Task assignment required")

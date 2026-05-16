@@ -2,7 +2,15 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from dependencies import get_current_user, get_project_or_404, get_task_or_404, require_owner_or_admin, require_project_member
+from dependencies import (
+    get_current_user,
+    get_project_or_404,
+    get_task_or_404,
+    is_project_leader,
+    require_owner_or_admin,
+    require_project_member,
+    require_task_access,
+)
 from models import Comment, Project, Task, User
 from schemas.task import TaskCreate, TaskOut, TaskUpdate
 
@@ -18,7 +26,11 @@ def ensure_assignee_is_member(project: Project, assigned_to) -> None:
 async def list_tasks(project_id: str, current_user: User = Depends(get_current_user)) -> list[Task]:
     project = await get_project_or_404(project_id)
     await require_project_member(project, current_user)
-    return await Task.find(Task.project_id == project.id).sort("-updated_at").to_list()
+    if is_project_leader(project, current_user):
+        return await Task.find(Task.project_id == project.id).sort("-updated_at").to_list()
+    return await Task.find(
+        {"project_id": project.id, "assigned_to": current_user.id}
+    ).sort("-updated_at").to_list()
 
 
 @router.post("/api/projects/{project_id}/tasks", response_model=TaskOut, status_code=status.HTTP_201_CREATED)
@@ -30,8 +42,20 @@ async def create_task(
     project = await get_project_or_404(project_id)
     await require_owner_or_admin(project, current_user)
     ensure_assignee_is_member(project, payload.assigned_to)
-    task = Task(project_id=project.id, created_by=current_user.id, **payload.model_dump())
-    await task.insert()
+    payload_data = payload.model_dump()
+    assignee_ids = [payload.assigned_to] if payload.assigned_to is not None else list(
+        dict.fromkeys([project.owner_id, *project.member_ids])
+    )
+    created_tasks = []
+    for assignee_id in assignee_ids:
+        task = Task(
+            project_id=project.id,
+            created_by=current_user.id,
+            **{**payload_data, "assigned_to": assignee_id},
+        )
+        await task.insert()
+        created_tasks.append(task)
+    task = created_tasks[0]
     return task
 
 
@@ -39,7 +63,7 @@ async def create_task(
 async def get_task(task_id: str, current_user: User = Depends(get_current_user)) -> Task:
     task = await get_task_or_404(task_id)
     project = await get_project_or_404(str(task.project_id))
-    await require_project_member(project, current_user)
+    await require_task_access(project, task, current_user)
     return task
 
 
@@ -51,7 +75,7 @@ async def update_task(
 ) -> Task:
     task = await get_task_or_404(task_id)
     project = await get_project_or_404(str(task.project_id))
-    await require_project_member(project, current_user)
+    await require_task_access(project, task, current_user)
     data = payload.model_dump(exclude_unset=True)
     if current_user.role != "admin" and project.owner_id != current_user.id:
         disallowed = set(data) - {"status"}

@@ -2,7 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from dependencies import get_current_user
+from dependencies import get_current_user, is_project_leader
 from models import Project, Task, User
 from schemas.dashboard import DashboardOut, DashboardProjectOut, DashboardTaskOut
 
@@ -42,6 +42,10 @@ async def dashboard(
     today = date.today()
     if all_project_ids:
         all_tasks = await Task.find({"project_id": {"$in": all_project_ids}}).sort("-updated_at").to_list()
+        all_tasks = [
+            task for task in all_tasks
+            if is_project_leader(project_lookup[str(task.project_id)], current_user) or task.assigned_to == current_user.id
+        ]
 
     for task in all_tasks:
         task_project_id = str(task.project_id)

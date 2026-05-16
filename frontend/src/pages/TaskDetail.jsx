@@ -104,7 +104,7 @@ export default function TaskDetail() {
             </select>
           </SummaryItem>
           <SummaryItem label="Priority" value={task.priority} />
-          <SummaryItem label="Assignee" value={assignee ? `${assignee.username} (${assignee.email})` : "All members"} />
+          <SummaryItem label="Assignee" value={assignee ? `${assignee.username} (${assignee.email})` : "Unassigned legacy task"} />
           <SummaryItem label="Due date" value={task.due_date || "No due date"} />
         </div>
 
@@ -132,7 +132,7 @@ export default function TaskDetail() {
             <label className="field">
               <span>Assign to</span>
               <select value={form.assigned_to} onChange={update("assigned_to")}>
-                <option value="">All members</option>
+                {task.assigned_to ? null : <option value="">Unassigned legacy task</option>}
                 {project?.members?.map((member) => (
                   <option key={member.id} value={member.id}>{member.username} ({member.email})</option>
                 ))}
