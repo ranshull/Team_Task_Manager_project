@@ -28,7 +28,7 @@ export default function ProjectDetail() {
     due_date: ""
   });
 
-  if (projectLoading) return <main className="page">Loading project...</main>;
+  if (projectLoading) return <main className="page loading-state"><span className="spinner" />Loading project...</main>;
 
   const create = async (event) => {
     event.preventDefault();
@@ -76,7 +76,8 @@ export default function ProjectDetail() {
           </div>
           <form onSubmit={add}>
             <input type="email" placeholder="Member email" value={memberEmail} onChange={(event) => setMemberEmail(event.target.value)} required />
-            <button className="button secondary" disabled={addMember.isPending}>
+            <button className="button secondary button--loading" disabled={addMember.isPending}>
+              {addMember.isPending && <span className="spinner" />}
               {addMember.isPending ? "Adding..." : "Add"}
             </button>
           </form>
@@ -94,7 +95,7 @@ export default function ProjectDetail() {
           ))}
         </div>
       </section>
-      {tasksLoading ? <p>Loading tasks...</p> : (
+      {tasksLoading ? <p className="loading-state"><span className="spinner" />Loading tasks...</p> : (
         <KanbanBoard
           tasks={tasks}
           members={project.members || []}
@@ -119,7 +120,8 @@ export default function ProjectDetail() {
             <label className="field"><span>Priority</span><select value={taskForm.priority} onChange={(event) => setTaskForm({ ...taskForm, priority: event.target.value })}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
           </div>
           <label className="field"><span>Due date</span><input type="date" value={taskForm.due_date} onChange={(event) => setTaskForm({ ...taskForm, due_date: event.target.value })} /></label>
-          <button className="button" disabled={createTask.isPending}>
+          <button className="button button--loading" disabled={createTask.isPending}>
+            {createTask.isPending && <span className="spinner" />}
             {createTask.isPending ? "Creating..." : "Create task"}
           </button>
         </form>

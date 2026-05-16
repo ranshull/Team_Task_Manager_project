@@ -89,6 +89,7 @@
 .chart-card {
   min-height: 260px;
   padding: 18px;
+  animation: fadeInUp 360ms ease both;
 }
 
 .chart-card--wide {
@@ -125,6 +126,21 @@
 .chart-card svg {
   width: 100%;
   height: auto;
+}
+
+.chart-card rect {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: growBar 700ms ease both;
+}
+
+.donut-layout circle:not(:first-child) {
+  animation: drawRing 900ms ease both;
+}
+
+.due-meter span,
+.project-load__bar span {
+  animation: fillMeter 700ms ease both;
 }
 
 .chart-card text {
@@ -251,5 +267,37 @@
   .due-row,
   .project-load__row {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes growBar {
+  from {
+    transform: scaleY(0.08);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes drawRing {
+  from {
+    stroke-dashoffset: 100;
+  }
+}
+
+@keyframes fillMeter {
+  from {
+    width: 0;
   }
 }

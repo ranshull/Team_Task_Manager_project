@@ -34,7 +34,7 @@ export default function Projects() {
         {isAdmin && <button className="button" onClick={() => setOpen(true)}>New Project</button>}
       </div>
       {notice && <p className="notice success">{notice}</p>}
-      {isLoading ? <p>Loading projects...</p> : (
+      {isLoading ? <p className="loading-state"><span className="spinner" />Loading projects...</p> : (
         <section className="projects-grid">
           {projects.map((project) => <ProjectCard key={project.id} project={project} />)}
         </section>
@@ -43,7 +43,8 @@ export default function Projects() {
         <form className="stack-form" onSubmit={submit}>
           <label className="field"><span>Name</span><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required /></label>
           <label className="field"><span>Description</span><textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} rows="4" /></label>
-          <button className="button" disabled={createProject.isPending}>
+          <button className="button button--loading" disabled={createProject.isPending}>
+            {createProject.isPending && <span className="spinner" />}
             {createProject.isPending ? "Creating..." : "Create"}
           </button>
         </form>

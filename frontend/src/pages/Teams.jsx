@@ -24,7 +24,7 @@ export default function Teams() {
   const canManageRoles = !isError && (isAdmin || users.length > 0);
 
   if (isLoading) {
-    return <main className="page">Loading team...</main>;
+    return <main className="page loading-state"><span className="spinner" />Loading team...</main>;
   }
 
   if (!canManageRoles) {

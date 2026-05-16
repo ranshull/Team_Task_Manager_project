@@ -5,29 +5,22 @@ Team Task Manager is a full-stack project management application for small teams
 ## Screenshots
 
 ### Landing Page
-
-![Landing Page](Project_Pics/Screenshot 2026-05-15 at 6.00.24 PM.png)
-
+![Landing Page](Project_Pics/Screenshot%202026-05-15%20at%206.00.24%E2%80%AFPM.png)
 
 ### Dashboard
-
-![Dashboard](Project_Pics/Screenshot 2026-05-15 at 6.02.00 PM.png)
+![Dashboard](Project_Pics/Screenshot%202026-05-15%20at%206.02.00%E2%80%AFPM.png)
 
 ### Projects
-
-![Projects Page](Project_Pics/Screenshot 2026-05-15 at 6.02.17 PM.png)
+![Projects Page](Project_Pics/Screenshot%202026-05-15%20at%206.02.17%E2%80%AFPM.png)
 
 ### Project Board
-
-![Project Board](Project_Pics/Screenshot 2026-05-15 at 6.02.57 PM.png)
+![Project Board](Project_Pics/Screenshot%202026-05-15%20at%206.02.57%E2%80%AFPM.png)
 
 ### Task Detail and Comments
-
-![Task Details and Comments](Project_Pics/Screenshot 2026-05-15 at 6.03.56 PM.png)
+![Task Details and Comments](Project_Pics/Screenshot%202026-05-15%20at%206.03.56%E2%80%AFPM.png)
 
 ### Teams Admin Page
-
-![Teams Admin Page](Project_Pics/Screenshot 2026-05-15 at 6.04.15 PM.png)
+![Teams Admin Page](Project_Pics/Screenshot%202026-05-15%20at%206.04.15%E2%80%AFPM.png)
 
 ## Main Features
 

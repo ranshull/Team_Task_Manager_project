@@ -24,7 +24,7 @@ export default function CommentSection({ taskId }) {
   return (
     <section className="comments">
       <h2>Comments</h2>
-      {isLoading ? <p className="muted">Loading comments...</p> : (
+      {isLoading ? <p className="loading-state"><span className="spinner" />Loading comments...</p> : (
         <div className="comments__list">
           {comments.map((comment) => (
             <article className="comment" key={comment.id}>
@@ -53,7 +53,8 @@ export default function CommentSection({ taskId }) {
       <form className="comments__form" onSubmit={submit}>
         <textarea value={body} onChange={(event) => setBody(event.target.value)} rows="4" placeholder="Write a comment..." />
         {notice && <p className="notice success">{notice}</p>}
-        <button className="button" disabled={postComment.isPending}>
+        <button className="button button--loading" disabled={postComment.isPending}>
+          {postComment.isPending && <span className="spinner" />}
           {postComment.isPending ? "Posting..." : "Post"}
         </button>
       </form>

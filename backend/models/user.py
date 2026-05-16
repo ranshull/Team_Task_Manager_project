@@ -9,6 +9,7 @@ class User(Document):
     email: Indexed(EmailStr, unique=True)
     username: Indexed(str, unique=True)
     hashed_password: str
+    phone: str = ""
     role: Literal["admin", "member"] = "member"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

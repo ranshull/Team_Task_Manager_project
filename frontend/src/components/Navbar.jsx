@@ -15,6 +15,7 @@ export default function Navbar() {
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/projects">Projects</NavLink>
           <NavLink to="/teams">Teams</NavLink>
+          <NavLink to="/profile">Profile</NavLink>
         </nav>
         <div className="navbar__user">
           <div>

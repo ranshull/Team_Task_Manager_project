@@ -9,6 +9,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=50)
     password: str = Field(min_length=8)
+    phone: str = ""
     role: Literal["admin", "member"] = "member"
 
 
@@ -18,6 +19,7 @@ class UserOut(BaseModel):
     id: PydanticObjectId
     email: EmailStr
     username: str
+    phone: str = ""
     role: Literal["admin", "member"]
     created_at: datetime
 
@@ -28,6 +30,7 @@ class UserSummary(BaseModel):
     id: PydanticObjectId
     email: EmailStr
     username: str
+    phone: str = ""
     role: Literal["admin", "member"]
 
 
@@ -48,3 +51,8 @@ class RefreshRequest(BaseModel):
 
 class UserRoleUpdate(BaseModel):
     role: Literal["admin", "member"]
+
+
+class UserProfileUpdate(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    phone: str = ""

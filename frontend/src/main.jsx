@@ -14,6 +14,7 @@ import Projects from "./pages/Projects.jsx";
 import ProjectDetail from "./pages/ProjectDetail.jsx";
 import TaskDetail from "./pages/TaskDetail.jsx";
 import Teams from "./pages/Teams.jsx";
+import Profile from "./pages/Profile.jsx";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function AppLayout() {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
           <Route path="/teams" element={<Teams />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </div>
