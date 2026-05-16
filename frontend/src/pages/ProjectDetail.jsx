@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../api/hooks/useAuth.js";
 import { useAddMember, useDeleteProject, useProject, useUpdateProject } from "../api/hooks/useProjects.js";
 import { useCreateTask, useProjectTasks, useUpdateTask } from "../api/hooks/useTasks.js";
+import { useUserSearch } from "../api/hooks/useUsers.js";
 import KanbanBoard from "../components/KanbanBoard.jsx";
 import Modal from "../components/Modal.jsx";
 import "./ProjectDetail.css";
@@ -21,6 +22,8 @@ export default function ProjectDetail() {
   const [taskOpen, setTaskOpen] = useState(false);
   const [projectOpen, setProjectOpen] = useState(false);
   const [memberEmail, setMemberEmail] = useState("");
+  const [memberSearchOpen, setMemberSearchOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [projectForm, setProjectForm] = useState({ name: "", description: "" });
@@ -33,9 +36,12 @@ export default function ProjectDetail() {
     due_date: ""
   });
 
+  const canManageProject = Boolean(project && (isAdmin || project.owner_id === user?.id));
+  const memberSearch = useUserSearch(memberEmail, canManageProject && memberSearchOpen);
   if (projectLoading) return <main className="page loading-state"><span className="spinner" />Loading project...</main>;
 
-  const canManageProject = isAdmin || project.owner_id === user?.id;
+  const memberIds = new Set((project.member_ids || []).map(String));
+  const memberSuggestions = (memberSearch.data || []).filter((member) => !memberIds.has(String(member.id)));
 
   const openProjectEditor = () => {
     setProjectForm({ name: project.name, description: project.description || "" });
@@ -90,9 +96,22 @@ export default function ProjectDetail() {
 
   const add = async (event) => {
     event.preventDefault();
-    await addMember.mutateAsync(memberEmail);
-    setNotice("Member added successfully.");
-    setMemberEmail("");
+    setNotice("");
+    setError("");
+    try {
+      await addMember.mutateAsync(memberEmail);
+      setNotice("Member added successfully.");
+      setMemberEmail("");
+      setMemberSearchOpen(false);
+    } catch (err) {
+      setError(err.response?.status === 404 ? "User doesn't exist." : err.response?.data?.detail || "Unable to add member");
+    }
+  };
+
+  const chooseMemberSuggestion = (member) => {
+    setMemberEmail(member.email);
+    setMemberSearchOpen(false);
+    setError("");
   };
 
   const updateStatus = (taskId, status) => {
@@ -129,7 +148,33 @@ export default function ProjectDetail() {
             <p className="muted">{project.member_ids.length} current members</p>
           </div>
           <form onSubmit={add}>
-            <input type="email" placeholder="Member email" value={memberEmail} onChange={(event) => setMemberEmail(event.target.value)} required />
+            <div className="member-search">
+              <input
+                type="email"
+                placeholder="Search by name or email"
+                value={memberEmail}
+                onChange={(event) => {
+                  setMemberEmail(event.target.value);
+                  setMemberSearchOpen(true);
+                }}
+                onFocus={() => setMemberSearchOpen(true)}
+                required
+              />
+              {memberSearchOpen && memberEmail.trim() && (
+                <div className="member-search__menu">
+                  {memberSearch.isLoading && <span>Searching...</span>}
+                  {!memberSearch.isLoading && memberSuggestions.map((member) => (
+                    <button key={member.id} type="button" onMouseDown={() => chooseMemberSuggestion(member)}>
+                      <strong>{member.username}</strong>
+                      <span>{member.email}</span>
+                    </button>
+                  ))}
+                  {!memberSearch.isLoading && memberSuggestions.length === 0 && (
+                    <span>No matching users found.</span>
+                  )}
+                </div>
+              )}
+            </div>
             <button className="button secondary button--loading" disabled={addMember.isPending}>
               {addMember.isPending && <span className="spinner" />}
               {addMember.isPending ? "Adding..." : "Add"}
@@ -141,11 +186,11 @@ export default function ProjectDetail() {
         <h2>Members</h2>
         <div>
           {project.members?.map((member) => (
-            <article key={member.id}>
+            <button key={member.id} type="button" className="member-card" onClick={() => setSelectedMember(member)}>
               <strong>{member.username}</strong>
               <span>{member.email}</span>
               <em>{member.id === project.owner_id ? "leader" : member.role}</em>
-            </article>
+            </button>
           ))}
         </div>
       </section>
@@ -204,6 +249,33 @@ export default function ProjectDetail() {
           </button>
         </form>
       </Modal>
+      <Modal title="Member profile" open={Boolean(selectedMember)} onClose={() => setSelectedMember(null)}>
+        {selectedMember && (
+          <section className="member-profile">
+            <div className="member-profile__avatar">{initials(selectedMember.username)}</div>
+            <div>
+              <h3>{selectedMember.username}</h3>
+              <p>{selectedMember.email}</p>
+            </div>
+            <ProfileRow label="Phone" value={selectedMember.phone || "Not added"} />
+            <ProfileRow label="Project access" value={selectedMember.id === project.owner_id ? "Project leader" : "Project member"} />
+            <ProfileRow label="System role" value={selectedMember.role} />
+          </section>
+        )}
+      </Modal>
     </main>
   );
+}
+
+function ProfileRow({ label, value }) {
+  return (
+    <div className="member-profile__row">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function initials(name = "") {
+  return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "U";
 }

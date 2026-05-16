@@ -9,6 +9,15 @@ export function useUsers(enabled = true) {
   });
 }
 
+export function useUserSearch(query, enabled = true) {
+  const normalized = query.trim();
+  return useQuery({
+    queryKey: ["users", "search", normalized],
+    queryFn: async () => (await api.get("/api/users/search", { params: { q: normalized } })).data,
+    enabled: enabled && normalized.length > 0
+  });
+}
+
 export function useUpdateUserRole() {
   const queryClient = useQueryClient();
   return useMutation({
