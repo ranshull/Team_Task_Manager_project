@@ -26,6 +26,7 @@ export default function ProjectDetail() {
   const [memberSearchOpen, setMemberSearchOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [taskAssigneeQuery, setTaskAssigneeQuery] = useState("");
+  const [taskAssigneeOpen, setTaskAssigneeOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [projectForm, setProjectForm] = useState({ name: "", description: "" });
@@ -112,6 +113,7 @@ export default function ProjectDetail() {
       );
       setTaskOpen(false);
       setTaskAssigneeQuery("");
+      setTaskAssigneeOpen(false);
       setTaskForm({ title: "", description: "", assignmentMode: "all", assigned_to_ids: [], priority: "medium", status: "todo", due_date: "" });
       if (assignedCount === 1) {
         setTimeout(() => navigate(`/tasks/${task.id}`), 700);
@@ -285,11 +287,14 @@ export default function ProjectDetail() {
               </label>
               {taskForm.assignmentMode === "selected" && (
                 <div className="task-assignee__picker">
-                  <input
-                    value={taskAssigneeQuery}
-                    onChange={(event) => setTaskAssigneeQuery(event.target.value)}
-                    placeholder="Search project members"
-                  />
+                  <button
+                    type="button"
+                    className="task-assignee__trigger"
+                    onClick={() => setTaskAssigneeOpen((current) => !current)}
+                  >
+                    <span>{selectedAssignees.length ? `${selectedAssignees.length} selected` : "Select members"}</span>
+                    <strong>{taskAssigneeOpen ? "Close" : "Open"}</strong>
+                  </button>
                   {selectedAssignees.length > 0 && (
                     <div className="task-assignee__chips">
                       {selectedAssignees.map((member) => (
@@ -300,20 +305,35 @@ export default function ProjectDetail() {
                       ))}
                     </div>
                   )}
-                  <div className="task-assignee__options">
-                    {filteredAssignableMembers.map((member) => (
-                      <button
-                        key={member.id}
-                        type="button"
-                        className={taskForm.assigned_to_ids.includes(member.id) ? "is-selected" : ""}
-                        onClick={() => toggleTaskAssignee(member.id)}
-                      >
-                        <strong>{member.username}</strong>
-                        <span>{member.email}</span>
-                      </button>
-                    ))}
-                    {filteredAssignableMembers.length === 0 && <p className="muted">No project members match this search.</p>}
-                  </div>
+                  {taskAssigneeOpen && (
+                    <div className="task-assignee__dropdown">
+                      <input
+                        value={taskAssigneeQuery}
+                        onChange={(event) => setTaskAssigneeQuery(event.target.value)}
+                        placeholder="Search project members"
+                      />
+                      <div className="task-assignee__options">
+                        {filteredAssignableMembers.map((member) => {
+                          const checked = taskForm.assigned_to_ids.includes(member.id);
+                          return (
+                            <button
+                              key={member.id}
+                              type="button"
+                              className={checked ? "is-selected" : ""}
+                              onClick={() => toggleTaskAssignee(member.id)}
+                            >
+                              <span className="task-assignee__check">{checked ? "on" : ""}</span>
+                              <span>
+                                <strong>{member.username}</strong>
+                                <small>{member.email}</small>
+                              </span>
+                            </button>
+                          );
+                        })}
+                        {filteredAssignableMembers.length === 0 && <p className="muted">No project members match this search.</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

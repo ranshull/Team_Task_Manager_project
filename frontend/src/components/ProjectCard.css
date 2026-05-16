@@ -28,7 +28,34 @@
 }
 
 .project-card span {
-  align-self: end;
   color: var(--color-primary);
   font-weight: 800;
+}
+
+.project-card__footer {
+  align-self: end;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.project-card__role {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.project-card__role--leader {
+  background: rgba(79, 70, 229, 0.12);
+  color: var(--color-primary);
+}
+
+.project-card__role--member {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  text-transform: none;
 }
