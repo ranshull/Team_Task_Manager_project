@@ -95,3 +95,20 @@ async def add_member(
         project.member_ids.append(user_id)
         await project.save()
     return await project_out(project)
+
+
+@router.delete("/{project_id}/members/{user_id}", response_model=ProjectOut)
+async def remove_member(
+    project_id: str,
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+) -> ProjectOut:
+    project = await get_project_or_404(project_id)
+    await require_owner_or_admin(project, current_user)
+    member_id = PydanticObjectId(user_id)
+    if member_id == project.owner_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Project leader cannot be removed")
+    if member_id in project.member_ids:
+        project.member_ids = [existing_id for existing_id in project.member_ids if existing_id != member_id]
+        await project.save()
+    return await project_out(project)

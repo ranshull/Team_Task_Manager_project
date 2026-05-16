@@ -57,3 +57,15 @@ export function useAddMember(projectId) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["project", projectId] })
   });
 }
+
+export function useRemoveMember(projectId) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (userId) => (await api.delete(`/api/projects/${projectId}/members/${userId}`)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["tasks", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    }
+  });
+}

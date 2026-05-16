@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../api/hooks/useAuth.js";
-import { useAddMember, useDeleteProject, useProject, useUpdateProject } from "../api/hooks/useProjects.js";
+import { useAddMember, useDeleteProject, useProject, useRemoveMember, useUpdateProject } from "../api/hooks/useProjects.js";
 import { useCreateTask, useProjectTasks, useUpdateTask } from "../api/hooks/useTasks.js";
 import { useUserSearch } from "../api/hooks/useUsers.js";
 import KanbanBoard from "../components/KanbanBoard.jsx";
@@ -17,6 +17,7 @@ export default function ProjectDetail() {
   const updateTask = useUpdateTask(id);
   const createTask = useCreateTask(id);
   const addMember = useAddMember(id);
+  const removeMember = useRemoveMember(id);
   const updateProject = useUpdateProject(id);
   const deleteProject = useDeleteProject();
   const [taskOpen, setTaskOpen] = useState(false);
@@ -114,6 +115,20 @@ export default function ProjectDetail() {
     setError("");
   };
 
+  const removeSelectedMember = async () => {
+    if (!selectedMember) return;
+    if (!window.confirm(`Remove ${selectedMember.username} from this project?`)) return;
+    setNotice("");
+    setError("");
+    try {
+      await removeMember.mutateAsync(selectedMember.id);
+      setNotice(`${selectedMember.username} was removed from the project.`);
+      setSelectedMember(null);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Unable to remove member");
+    }
+  };
+
   const updateStatus = (taskId, status) => {
     updateTask.mutate(
       { id: taskId, payload: { status } },
@@ -149,17 +164,23 @@ export default function ProjectDetail() {
           </div>
           <form onSubmit={add}>
             <div className="member-search">
-              <input
-                type="email"
-                placeholder="Search by name or email"
-                value={memberEmail}
-                onChange={(event) => {
-                  setMemberEmail(event.target.value);
-                  setMemberSearchOpen(true);
-                }}
-                onFocus={() => setMemberSearchOpen(true)}
-                required
-              />
+              <div className="member-search__bar">
+                <input
+                  type="email"
+                  placeholder="Search by name or email"
+                  value={memberEmail}
+                  onChange={(event) => {
+                    setMemberEmail(event.target.value);
+                    setMemberSearchOpen(true);
+                  }}
+                  onFocus={() => setMemberSearchOpen(true)}
+                  required
+                />
+                <button className="button secondary button--loading" disabled={addMember.isPending}>
+                  {addMember.isPending && <span className="spinner" />}
+                  {addMember.isPending ? "Adding..." : "Add"}
+                </button>
+              </div>
               {memberSearchOpen && memberEmail.trim() && (
                 <div className="member-search__menu">
                   {memberSearch.isLoading && <span>Searching...</span>}
@@ -175,10 +196,6 @@ export default function ProjectDetail() {
                 </div>
               )}
             </div>
-            <button className="button secondary button--loading" disabled={addMember.isPending}>
-              {addMember.isPending && <span className="spinner" />}
-              {addMember.isPending ? "Adding..." : "Add"}
-            </button>
           </form>
         </section>
       )}
@@ -260,6 +277,12 @@ export default function ProjectDetail() {
             <ProfileRow label="Phone" value={selectedMember.phone || "Not added"} />
             <ProfileRow label="Project access" value={selectedMember.id === project.owner_id ? "Project leader" : "Project member"} />
             <ProfileRow label="System role" value={selectedMember.role} />
+            {canManageProject && selectedMember.id !== project.owner_id && (
+              <button className="button danger button--loading" onClick={removeSelectedMember} disabled={removeMember.isPending}>
+                {removeMember.isPending && <span className="spinner" />}
+                {removeMember.isPending ? "Removing..." : "Remove from project"}
+              </button>
+            )}
           </section>
         )}
       </Modal>

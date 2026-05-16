@@ -47,7 +47,7 @@ def is_project_leader(project: Project, user: User) -> bool:
 
 
 def can_access_task(project: Project, task: Task, user: User) -> bool:
-    return is_project_leader(project, user) or task.assigned_to == user.id
+    return is_project_leader(project, user) or (user.id in project.member_ids and task.assigned_to == user.id)
 
 
 async def get_project_or_404(project_id: str) -> Project:

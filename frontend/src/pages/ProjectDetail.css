@@ -26,19 +26,23 @@
 }
 
 .member-panel {
+  position: relative;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
-  padding: 18px;
+  padding: 20px;
   box-shadow: var(--shadow), var(--glass-inset);
   backdrop-filter: var(--glass-blur);
 }
 
 .member-list {
+  position: relative;
+  z-index: 1;
   display: grid;
   gap: 12px;
 }
@@ -85,26 +89,43 @@
 }
 
 .member-panel form {
-  display: flex;
-  gap: 10px;
+  display: block;
+  width: min(460px, 100%);
 }
 
 .member-search {
   position: relative;
-  min-width: min(320px, 100%);
+  width: 100%;
+}
+
+.member-search__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(124, 138, 166, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 6px;
+  box-shadow: var(--glass-inset);
 }
 
 .member-panel input {
+  min-width: 0;
   width: 100%;
-  border: 1px solid rgba(124, 138, 166, 0.28);
-  border-radius: 8px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.72);
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.member-search__bar .button {
+  flex: 0 0 auto;
+  min-height: 38px;
 }
 
 .member-search__menu {
   position: absolute;
-  z-index: 20;
+  z-index: 1000;
   top: calc(100% + 8px);
   right: 0;
   left: 0;
@@ -114,7 +135,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.96);
   padding: 6px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 22px 45px rgba(15, 23, 42, 0.2);
 }
 
 .member-search__menu button,
@@ -179,6 +200,11 @@
   font-weight: 800;
 }
 
+.member-profile .button {
+  justify-self: start;
+  margin-top: 4px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -187,8 +213,16 @@
 
 @media (max-width: 720px) {
   .project-detail__header,
-  .member-panel,
+  .member-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .member-panel form {
+    width: 100%;
+  }
+
+  .member-search__bar {
     align-items: stretch;
     flex-direction: column;
   }
